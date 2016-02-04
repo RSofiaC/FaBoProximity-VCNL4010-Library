@@ -6,7 +6,7 @@ This is a library for FaBo Proximity Brick.
 
 ## VCNL4010
 
-Fully Integrated Proximity and Ambient Light Sensor with Infrared Emitter, I2C Interface, and Interrupt Function
+Proximity and Ambient Light Sensor with Infrared Emitter, I2C Interface
 
 ## Datasheet
 
