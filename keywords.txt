@@ -18,17 +18,13 @@ setupDevice	KEYWORD2
 setCurrent	KEYWORD2
 readCurrent	KEYWORD2
 setCommand	KEYWORD2
-readCommandRegister	KEYWORD2
-setProximityRate	KEYWORD2
-setAmbiConfiguration	KEYWORD2
-readProxValue	KEYWORD2
-readAmbiValue	KEYWORD2
+readCommand	KEYWORD2
+setProxRate	KEYWORD2
+setAmbiConfig	KEYWORD2
 isProxDataReady	KEYWORD2
 isAmbiDataReady	KEYWORD2
-setInterruptControl	KEYWORD2
-setHighThreshold	KEYWORD2
-readInterruptStatus	KEYWORD2
-setInterruptStatus	KEYWORD2
+readProxValue	KEYWORD2
+readAmbiValue	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

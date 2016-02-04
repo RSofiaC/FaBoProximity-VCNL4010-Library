@@ -95,17 +95,13 @@ class FaBoProximity_VCNL4010 {
     void setCurrent(uint8_t current);
     uint8_t readCurrent();
     void setCommand(uint8_t command);
-    uint8_t readCommandRegister(void);
-    void setProximityRate(uint8_t rate);
-    void setAmbiConfiguration(uint8_t config);
-    uint16_t readProxValue(void);
-    uint16_t readAmbiValue(void);
+    uint8_t readCommand(void);
+    void setProxRate(uint8_t rate);
+    void setAmbiConfig(uint8_t config);
     bool isProxDataReady(void);
     bool isAmbiDataReady(void);
-    void setInterruptControl(uint8_t ctrl);
-    void setHighThreshold(uint8_t highThreshold);
-    uint8_t readInterruptStatus(void);
-    void setInterruptStatus(uint8_t status);
+    uint16_t readProxValue(void);
+    uint16_t readAmbiValue(void);
   private:
     uint8_t _i2caddr;
     uint8_t readI2c(uint8_t address);
