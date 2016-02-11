@@ -86,12 +86,12 @@
 #define VCNL4010_INTERRUPT_MASK_PROX_READY 0x08
 
 
-class FaBoProximity_VCNL4010 {
+class FaBoProximity {
   public:
-    FaBoProximity_VCNL4010(uint8_t addr = VCNL4010_SLAVE_ADDRESS);
-    bool checkDevice(void);
+    FaBoProximity(uint8_t addr = VCNL4010_SLAVE_ADDRESS);
+    bool searchDevice(void);
     uint8_t readId();
-    void setupDevice(void);
+    void configuration(void);
     void setCurrent(uint8_t current);
     uint8_t readCurrent();
     void setCommand(uint8_t command);

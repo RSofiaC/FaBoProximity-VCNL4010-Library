@@ -7,14 +7,14 @@
 #include <Wire.h>
 #include <FaBoProximity_VCNL4010.h>
 
-FaBoProximity_VCNL4010 fabo_proximity;
+FaBoProximity faboProximity;
 
 void setup() {
   Serial.begin(9600); // シリアルの開始
 
   Serial.println("Checking I2C device...");
   // I2Cデバイスチェック
-  if (fabo_proximity.checkDevice()) {
+  if (faboProximity.searchDevice()) {
     Serial.println("VCNL4010: Device found");
   } else {
     Serial.println("Device not found");
@@ -22,20 +22,20 @@ void setup() {
   }
 
   // デバイス初期化
-  fabo_proximity.setupDevice();
+  faboProximity.configuration();
 }
 
 void loop() {
   // proximityデータの出力
-  if ( fabo_proximity.isProxDataReady() ) {
+  if ( faboProximity.isProxDataReady() ) {
     Serial.print("Proximity(cts): ");
-    Serial.println(fabo_proximity.readProxValue());
+    Serial.println(faboProximity.readProxValue());
   }
 
   // ambientデータの出力
-  if ( fabo_proximity.isAmbiDataReady() ) {
+  if ( faboProximity.isAmbiDataReady() ) {
     Serial.print("Ambi: ");
-    Serial.println(fabo_proximity.readAmbiValue());
+    Serial.println(faboProximity.readAmbiValue());
   }
 
   delay(1000);
