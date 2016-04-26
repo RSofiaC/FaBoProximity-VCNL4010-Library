@@ -1,27 +1,34 @@
 /**
- * @file  FaBoProximity_VCNL4010.cpp
- * @brief fabo libtary of VCNL4010
- * @author Akira Sasaki
- * @date 2,10, 2016
- */
+ @file FaBoProximity_VCNL4010.cpp
+ @brief This is a library for the FaBo Proximity I2C Brick.
+
+   http://fabo.io/205.html
+
+   Released under APACHE LICENSE, VERSION 2.0
+
+   http://www.apache.org/licenses/
+
+ @author FaBo<info@fabo.io>
+*/
+
 #include "FaBoProximity_VCNL4010.h"
 
 /**
- * @brief VCNL4010 processing Start
- * @param addr : VCNL4010 Slave Address
- */
+ @brief Constructor
+*/
 FaBoProximity::FaBoProximity(uint8_t addr) {
   _i2caddr = addr;
   Wire.begin();
 }
 
 /**
- * @brief Search Device VCNL4010
- * @retval true  : found
- * @retval false : Not found
- */
-bool FaBoProximity::searchDevice(void) {
-  if ( readId() == 0x21 ) {
+ @brief Begin Device
+ @retval true normaly done
+ @retval false device error
+*/
+bool FaBoProximity::begin() {
+  if ( searchDevice() ) {
+    configuration();
     return true;
   } else {
     return false;
@@ -29,135 +36,143 @@ bool FaBoProximity::searchDevice(void) {
 }
 
 /**
- * @brief Read product ID and product revision
- * @retval true  : found
- * @retval false : Not found
- */
-uint8_t FaBoProximity::readId(void) {
-  return readI2c(VCNL4010_ID);
-}
-
-/**
- * @brief Set Config
- */
-void FaBoProximity::configuration(void) {
-  setCurrent(20);
-  setCommand(VCNL4010_COMMAND_ALL_DISABLE);
-  setProxRate(VCNL4010_PROX_MEASUREMENT_RATE_31);
-  setCommand(VCNL4010_COMMAND_PROX_ENABLE |
-             VCNL4010_COMMAND_AMBI_ENABLE |
-             VCNL4010_COMMAND_SELFTIMED_MODE_ENABLE);
-  setAmbiConfig(VCNL4010_AMBI_PARA_AVERAGE_32 |
-                VCNL4010_AMBI_PARA_AUTO_OFFSET_ENABLE |
-                VCNL4010_AMBI_PARA_MEAS_RATE_2);
-}
-
-/**
- * @brief LED Current Setting for Proximity
- * @param [in] current : IR LED current value
- */
-void FaBoProximity::setCurrent(uint8_t current) {
-  if ( current > 20 ) {
-    current = 20;
+ @brief Search Device
+ @retval true device connected
+ @retval false device error
+*/
+bool FaBoProximity::searchDevice() {
+  if ( readI2c(VCNL4010_REG_ID) == VCNL4010_DEVICE_ID ) {
+    return true;
+  } else {
+    return false;
   }
-  writeI2c(VCNL4010_PROX_CURRENT, current);
 }
 
 /**
- * @brief Read LED Current for Proximity
- * @return uint8_t : IR LED current value
- */
-uint8_t FaBoProximity::readCurrent(void) {
-  return readI2c(VCNL4010_PROX_CURRENT);
+ @brief Configure Device
+*/
+void FaBoProximity::configuration() {
+  setCommand(
+    VCNL4010_CMD_SELFTIMED_EN |
+    VCNL4010_CMD_PROX_EN |
+    VCNL4010_CMD_ALS_EN );
+  setProxRate(VCNL4010_PROX_RATE_250);
+  setLedCurrent(20);
+  setAmbiParm(
+    VCNL4010_AMBI_RATE_10 |
+    VCNL4010_AMBI_AUTO_OFFSET |
+    VCNL4010_AMBI_AVE_NUM_128 );
 }
 
 /**
- * @brief Set Command Data
- * @param [in] command : set command data
- */
-void FaBoProximity::setCommand(uint8_t command) {
-  writeI2c(VCNL4010_COMMAND, command);
+ @brief Set Command Register
+ @param [in] config Configure Parameter
+*/
+void FaBoProximity::setCommand(uint8_t config) {
+  writeI2c(VCNL4010_REG_CMD, config);
 }
 
 /**
- * @brief Read Command Data
- * @return uint8_t : read command value
- */
-uint8_t FaBoProximity::readCommand(void) {
-  return readI2c(VCNL4010_COMMAND);
+ @brief Proximity Rate Register Setting
+ @param [in] config Configure Parameter
+*/
+void FaBoProximity::setProxRate(uint8_t config) {
+  writeI2c(VCNL4010_REG_PROX_RATE, config);
 }
 
 /**
- * @brief Set Proximity Rate
- * @param [in] rate : set rate value
- */
-void FaBoProximity::setProxRate(uint8_t rate) {
-  writeI2c(VCNL4010_PROX_RATE, rate);
+ @brief IR LED Current Setting
+ @param [in] config Configure Parameter
+*/
+void FaBoProximity::setLedCurrent(uint8_t config) {
+  writeI2c(VCNL4010_REG_LED_CRNT, config);
 }
 
 /**
- * @brief Set Ambient Light Config
- * @param [in] config : set config data
- */
-void FaBoProximity::setAmbiConfig(uint8_t config) {
-  writeI2c(VCNL4010_AMBI_PARAMETER, config);
+ @brief Ambient Light Parameter Register Setting
+ @param [in] config Configure Parameter
+*/
+void FaBoProximity::setAmbiParm(uint8_t config) {
+  writeI2c(VCNL4010_REG_AMBI_PARM, config);
 }
 
 /**
- * @brief Detect Proximity Data Ready
- * @retval true  : Ready
- * @retval false : Not Ready
- */
-bool FaBoProximity::isProxDataReady(void) {
-  if (readCommand() & VCNL4010_COMMAND_MASK_PROX_DATA_READY) {
+ @brief Check Proximity Data Ready
+ @retval true Data is Ready
+ @retval false Data is Not Ready
+*/
+bool FaBoProximity::checkProxReady() {
+  if ( readI2c(VCNL4010_REG_CMD) & VCNL4010_CMD_PROX_DRDY ) {
     return true;
   }
   return false;
 }
 
 /**
- * @brief Detect Ambient Light Data Ready
- * @retval true  : Ready
- * @retval false : Not Ready
- */
-bool FaBoProximity::isAmbiDataReady(void) {
-  if (readCommand() & VCNL4010_COMMAND_MASK_AMBI_DATA_READY) {
+ @brief Check Ambient Light Data Ready
+ @retval true Data is Ready
+ @retval false Data is Not Ready
+*/
+bool FaBoProximity::checkAmbiReady() {
+  if ( readI2c(VCNL4010_REG_CMD) & VCNL4010_CMD_ALS_DRDY ) {
     return true;
   }
   return false;
 }
 
 /**
- * @brief Read Proximity
- * @return uint8_t : Proximity value
- */
-uint16_t FaBoProximity::readProxValue(void) {
+ @brief Read Proximity Data
+ @param [out] value Proximity Data
+*/
+uint16_t FaBoProximity::readProx() {
   uint16_t value;
-  value = readI2c(VCNL4010_PROX_VALUE);
+  value = readI2c(VCNL4010_REG_PROX_DATA_H);
   value <<= 8;
-  value |= readI2c(VCNL4010_PROX_VALUE+1);
+  value |= readI2c(VCNL4010_REG_PROX_DATA_L);
   return value;
 }
 
 /**
- * @brief Read Command Data
- * @return uint8_t : Ambient Light value
- */
-uint16_t FaBoProximity::readAmbiValue(void) {
+ @brief Read Ambient Light Data
+ @param [out] value Ambient Light Data
+*/
+uint16_t FaBoProximity::readAmbi() {
   uint16_t value;
-  value = readI2c(VCNL4010_AMBI_VALUE);
+  value = readI2c(VCNL4010_REG_AMBI_DATA_H);
   value <<= 8;
-  value |= readI2c(VCNL4010_AMBI_VALUE+1);
+  value |= readI2c(VCNL4010_REG_AMBI_DATA_L);
   return value;
 }
 
-////////////////////////////////////////////////////////////////
+
+void FaBoProximity::dumpReg() {
+  uint8_t data;
+  int i;
+  for (i=0x80;i<=0x90;i++){
+    Serial.print("0x");
+    Serial.print(i, HEX);
+    Serial.print(": ");
+    data = readI2c(i);
+    print_byte(data);
+    Serial.println("");
+  }
+}
+
+void FaBoProximity::print_byte(uint8_t val) {
+  int i;
+  Serial.print("B");
+  for(i=7; i>=0; i--){
+    Serial.print(val >> i & 1, BIN);
+  }
+}
+
+
 
 /**
- * @brief Write I2C Data
- * @param [in] address : Write Register Address
- * @param [in] data    : Write Data
- */
+ @brief Write I2C
+ @param [in] address register address
+ @param [in] data write data
+*/
 void FaBoProximity::writeI2c(uint8_t address, uint8_t data) {
   Wire.beginTransmission(_i2caddr);
   Wire.write(address);
@@ -166,10 +181,10 @@ void FaBoProximity::writeI2c(uint8_t address, uint8_t data) {
 }
 
 /**
- * @brief Read I2C Data
- * @param [in] register_addr : register address
- * @return uint8_t : Read Data
- */
+ @brief Read I2C
+ @param [in] address register address
+ @param [out] data read data
+*/
 uint8_t FaBoProximity::readI2c(uint8_t address) {
   Wire.beginTransmission(_i2caddr);
   Wire.write(address);

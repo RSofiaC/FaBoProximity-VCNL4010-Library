@@ -1,8 +1,15 @@
-//
-// FaBo Brick Example
-//
-// FaBo Proximity VCNL4010
-//
+/**
+ @file proximity.ino
+ @brief This is an Example for the FaBo Proximity I2C Brick.
+
+   http://fabo.io/205.html
+
+   Released under APACHE LICENSE, VERSION 2.0
+
+   http://www.apache.org/licenses/
+
+ @author FaBo<info@fabo.io>
+*/
 
 #include <Wire.h>
 #include <FaBoProximity_VCNL4010.h>
@@ -10,32 +17,24 @@
 FaBoProximity faboProximity;
 
 void setup() {
-  Serial.begin(9600); // シリアルの開始
+  Serial.begin(9600);
+  Serial.println("RESET");
+  Serial.println();
 
-  Serial.println("Checking I2C device...");
-  // I2Cデバイスチェック
-  if (faboProximity.searchDevice()) {
-    Serial.println("VCNL4010: Device found");
-  } else {
-    Serial.println("Device not found");
-    while(1);
-  }
-
-  // デバイス初期化
-  faboProximity.configuration();
+  faboProximity.begin();
 }
 
 void loop() {
   // proximityデータの出力
-  if ( faboProximity.isProxDataReady() ) {
-    Serial.print("Proximity(cts): ");
-    Serial.println(faboProximity.readProxValue());
+  if(faboProximity.checkProxReady()){
+    Serial.print("Prox:");
+    Serial.println(faboProximity.readProx());
   }
 
   // ambientデータの出力
-  if ( faboProximity.isAmbiDataReady() ) {
-    Serial.print("Ambi: ");
-    Serial.println(faboProximity.readAmbiValue());
+  if(faboProximity.checkAmbiReady()){
+    Serial.print("Ambi:");
+    Serial.println(faboProximity.readAmbi());
   }
 
   delay(1000);
